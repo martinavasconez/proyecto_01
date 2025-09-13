@@ -76,16 +76,34 @@ Cada pipeline recibe parámetros vía **Mage**:
 - Si expira el `access_token` (`401 Unauthorized`), se refresca automáticamente vía `refresh_token`.
 
 ### Runbook (procedimiento de operación)
-1. Ejecutar pipeline en Mage. (si se hace desde el trigger se puede modificar los parámetros de start_date y end_date para extraer datos de distintas fechas)
-2. Monitorear logs en el bloque loader:
-   - Validar que los chunks y páginas se impriman secuencialmente.
-   - Confirmar cantidad de filas devueltas por cada request.
-3. Verificar bloque transformer:
-   - Asegurar que los datos se convierten a `DataFrame` correctamente.
-4. Confirmar bloque exporter:
-   - Logs indican número de filas insertadas/actualizadas.
-   - En caso de error, se registra un reporte en la tabla `backfill_report_<entidad>`.
-5. Revisar en pgAdmin que la tabla haya sido creada correctamente con los datos esperados.
+
+1. **Ejecución del pipeline en Mage**  
+   - Ejecutar el pipeline manualmente desde Mage o vía trigger.  
+   - Se pueden modificar los parámetros `start_date` y `end_date` para definir el rango a procesar.  
+
+2. **Monitoreo del bloque *loader***  
+   - Validar que los *chunks* y páginas se impriman secuencialmente.  
+   - Confirmar la cantidad de filas devueltas por cada request y que no haya saltos en las fechas.  
+
+3. **Verificación del bloque *transformer***  
+   - Confirmar que los datos se convierten correctamente a `DataFrame`.  
+   - Revisar en la esquina inferior izquierda el total de filas procesadas.  
+
+4. **Confirmación del bloque *exporter***  
+   - Revisar en los logs el número de filas `inserted`, `updated` y `skipped`.  
+   - En caso de error, se registra un reporte en la tabla `backfill_report_<entidad>`.  
+
+5. **Reanudación desde el último tramo exitoso**  
+   - Identificar en `backfill_report_<entidad>` el último `window_start` y `window_end` que terminaron en estado `success`.  
+   - Relanzar el pipeline configurando `start_date` = día siguiente del último `window_end`.  
+
+6. **Reintentos selectivos**  
+   - Si un tramo aparece con `status = error` en el reporte, volver a ejecutar el pipeline únicamente para ese rango de fechas (`start_date`, `end_date`).  
+   - El proceso es idempotente, por lo que no generará duplicados.  
+
+7. **Verificación en base de datos**  
+   - Consultar en `raw.qb_<entidad>` el conteo de filas por ventana de extracción para validar la volumetría.
+   - Verificar que las fechas cubren todo el rango y que los conteos son consistentes.  
 
 ## Trigger one-time: 
 - **Fecha/hora en UTC configurada**: `2025-09-11T05:06:00Z`  
