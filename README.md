@@ -173,6 +173,18 @@ Con los tres bloques se verifica las filas devueltas por chunk y pagina, cuantas
 ### Permisos
 - Mage requiere accesos de escritura en la base PostgreSQL para poder insertar las tablas. Es necesario verificar que el usuario tiene priviligeos para crear el schema, crear la tabla, y hacer upserts.
 
+## Checklist de aceptación
+
+- [x] Mage y Postgres se comunican por nombre de servicio.  
+- [x] Todos los secretos (QBO y Postgres) están en Mage Secrets; no hay secretos en el repo/entorno expuesto.  
+- [x] Pipelines `qb_<entidad>_backfill` aceptan `fecha_inicio` y `fecha_fin` (UTC) y segmentan el rango.  
+- [x] Trigger one-time configurado, ejecutado y luego deshabilitado/marcado como completado.  
+- [x] Esquema `raw` con tablas por entidad, payload completo y metadatos obligatorios.  
+- [x] Idempotencia verificada: reejecución de un tramo no genera duplicados.  
+- [x] Paginación y rate limits manejados y documentados.  
+- [x] Volumetría y validaciones mínimas registradas y archivadas como evidencia.  
+- [x] Runbook de reanudación y reintentos disponible y seguido.  
+
 
 
 
