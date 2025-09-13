@@ -1,0 +1,16 @@
+triggers:
+- description: null
+  envs: []
+  last_enabled_at: 2025-09-12 19:49:15.844810
+  name: qb_invoice_trigger
+  pipeline_uuid: qb_invoices_backfill
+  schedule_interval: '@once'
+  schedule_type: time
+  settings: null
+  sla: null
+  start_time: 2025-09-15 04:05:00
+  status: active
+  token: 077634bf147e40a989b0cfc614ecad93
+  variables:
+    end_date: '2025-08-31'
+    start_date: '2025-07-01'
